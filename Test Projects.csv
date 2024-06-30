@@ -1,0 +1,4 @@
+project_id,project_name,estimated_hours,actual_hours,difficulty,notes
+1,"Testing again",24.00,48.00,5,"this was hard"
+2,"Monica's Project",100.00,104.00,5,"Finally works!!"
+3,"Upload to Git",1.00,1.00,1,test
