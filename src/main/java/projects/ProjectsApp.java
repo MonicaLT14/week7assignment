@@ -11,38 +11,41 @@ import projects.service.ProjectService;
 
 /**
  * This class is a menu-driven application that accepts user input from the
- * console. It then performs CRUD operations on the project table
+ * console. It then performs CRUD operations on the project tables.
  * 
  * @author Promineo
- * 
+ *
  */
-
 public class ProjectsApp {
 	private Scanner scanner = new Scanner(System.in);
 	private ProjectService projectService = new ProjectService();
+	private Project curProject;
 
-	//@formatter:off
-	private List<String> operations = List.of(
-			"1) Add a project"
-	);
-	//@formatter:on
+	// @formatter:off
+  private List<String> operations = List.of(
+      "1) Add a project",
+      "2) List projects",
+      "3) Select a project"
+		  
+      
+  );
+  // @formatter:on
 
 	/**
 	 * Entry point for Java application.
 	 * 
-	 * @para args Unused
+	 * @param args Unused.
 	 */
 	public static void main(String[] args) {
-		new ProjectsApp().processUserSelection();
+		new ProjectsApp().processUserSelections();
 	}
 
 	/**
-	 * this method prints the operations, gets a user menu selection, and performs
+	 * This method prints the operations, gets a user menu selection, and performs
 	 * the requested operation. It repeats until the user requests that the
 	 * application terminate.
-	 * 
 	 */
-	private void processUserSelection() {
+	private void processUserSelections() {
 		boolean done = false;
 
 		while (!done) {
@@ -56,6 +59,14 @@ public class ProjectsApp {
 
 				case 1:
 					createProject();
+					break;
+
+				case 2:
+					listProject();
+					break;
+
+				case 3:
+					selectProject();
 					break;
 
 				default:
@@ -72,7 +83,6 @@ public class ProjectsApp {
 	 * Gather user input for a project row then call the project service to create
 	 * the row.
 	 */
-
 	private void createProject() {
 		String projectName = getStringInput("Enter the project name");
 		BigDecimal estimatedHours = getDecimalInput("Enter the estimated hours");
@@ -92,12 +102,41 @@ public class ProjectsApp {
 		System.out.println("You have successfully created project: " + dbProject);
 	}
 
+	private void selectProject() {
+		listProject();
+		Integer projectId = getIntInput("Enter a project ID to select a project");
+	
+		/* Unselect the current project */
+		curProject = null;
+	
+		/* This will throw an exception if an invalid project ID is entered. */
+		curProject = projectService.fetchProjectById(projectId);
+	}
+
+	private void listProject() {
+		List<Project> projects = projectService.fetchAllProjects();
+
+		System.out.println("\nProjects:");
+
+		projects.forEach(
+				project -> System.out.println(" " + project.getProjectId() + ": " + project.getProjectName()));
+	}
+
+	/**
+	 * Gets the user's input from the console and converts it to a BigDecimal.
+	 * 
+	 * @param prompt The prompt to display on the console.
+	 * @return A BigDecimal value if successful.
+	 * @throws DbException Thrown if an error occurs converting the number to a
+	 *                     BigDecimal.
+	 */
 	private BigDecimal getDecimalInput(String prompt) {
 		String input = getStringInput(prompt);
 
 		if (Objects.isNull(input)) {
 			return null;
 		}
+
 		try {
 			/* Create the BigDecimal object and set it to two decimal places (the scale). */
 			return new BigDecimal(input).setScale(2);
@@ -137,16 +176,16 @@ public class ProjectsApp {
 	 * 
 	 * @param prompt The prompt to print.
 	 * @return If the user enters nothing, {@code null} is returned. Otherwise, the
-	 *         input is converted to and Integer.
+	 *         input is converted to an Integer.
 	 * @throws DbException Thrown if the input is not a valid Integer.
 	 */
-
 	private Integer getIntInput(String prompt) {
 		String input = getStringInput(prompt);
 
 		if (Objects.isNull(input)) {
 			return null;
 		}
+
 		try {
 			return Integer.valueOf(input);
 		} catch (NumberFormatException e) {
@@ -163,27 +202,29 @@ public class ProjectsApp {
 	 * @return The user's input or {@code null}.
 	 */
 	private String getStringInput(String prompt) {
-		System.out.println(prompt + ": ");
+		System.out.print(prompt + ": ");
 		String input = scanner.nextLine();
-	
+
 		return input.isBlank() ? null : input.trim();
 	}
 
 	/**
-		 * Print the menu selections, one per line.
-		 */
-		private void printOperations() {
-			System.out.println("\nThese are the available selections. Press the Enter key to quit:");
-	
-			/*
-			 * With Lambda expression
-			 */
-			operations.forEach(line -> System.out.println(" " + line));
-			/* With enhanced for loop */
-	//		for (String line : operations) {
-	//			System.out.println(" " + line);
-	//		}
-	
-		}
+	 * Print the menu selections, one per line.
+	 */
+	private void printOperations() {
+		System.out.println("\nThese are the available selections. Press the Enter key to quit:");
 
+		/* With Lambda expression */
+		operations.forEach(line -> System.out.println("  " + line));
+
+		/* With enhanced for loop */
+		// for(String line : operations) {
+		// System.out.println(" " + line);
+		// }
+		if (Objects.isNull(curProject)) {
+			System.out.println("\nYou are not working with a project.");
+		} else {
+			System.out.println("\nYou are working with project: " + curProject);
+		}
+	}
 }
